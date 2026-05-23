@@ -2,7 +2,7 @@ import argparse
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
 
 from src.deepseek_client import DeepSeekClient
 from src.github_readme import GitHubClient
@@ -11,7 +11,6 @@ from src.github_repository import GitHubRepositoryClient
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FRONTEND_ROOT = PROJECT_ROOT / "frontend"
-OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 
 
 def build_analyze_response(repo_url, readme_client, repository_client, deepseek_client):
@@ -42,7 +41,6 @@ class WebAppHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
-        query = parse_qs(parsed.query)
 
         if path in {"/", "/index.html"}:
             self._send_static_file(FRONTEND_ROOT / "index.html", "text/html; charset=utf-8")
@@ -52,12 +50,6 @@ class WebAppHandler(BaseHTTPRequestHandler):
             return
         if path == "/app.js":
             self._send_static_file(FRONTEND_ROOT / "app.js", "application/javascript; charset=utf-8")
-            return
-        if path == "/api/outputs":
-            self._handle_outputs_list()
-            return
-        if path == "/api/output-content":
-            self._handle_output_content(query)
             return
         self._send_json({"error": "Not found"}, status=404)
 
@@ -88,33 +80,6 @@ class WebAppHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "Not found"}, status=404)
         except Exception as exc:
             self._send_json({"error": str(exc)}, status=500)
-
-    def _handle_outputs_list(self):
-        files = []
-        if OUTPUTS_DIR.exists():
-            for f in sorted(OUTPUTS_DIR.glob("*.md")):
-                files.append({
-                    "name": f.name,
-                    "size": f.stat().st_size,
-                })
-        self._send_json({"files": files})
-
-    def _handle_output_content(self, query):
-        file_name = (query.get("file") or [None])[0]
-        if not file_name:
-            self._send_json({"error": "Missing file parameter"}, status=400)
-            return
-        if ".." in file_name or "/" in file_name or "\\" in file_name:
-            self._send_json({"error": "Invalid file name"}, status=400)
-            return
-
-        file_path = OUTPUTS_DIR / file_name
-        if not file_path.exists() or not file_path.is_file():
-            self._send_json({"error": "File not found"}, status=404)
-            return
-
-        content = file_path.read_text(encoding="utf-8")
-        self._send_json({"file": file_name, "content": content})
 
     def _read_json(self):
         content_length = int(self.headers.get("Content-Length", "0"))

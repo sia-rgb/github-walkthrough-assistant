@@ -4,7 +4,6 @@ const overviewContent = document.getElementById("overviewContent");
 const readmeContent = document.getElementById("readmeContent");
 const plainExplainButton = document.getElementById("plainExplainButton");
 const plainExplainContent = document.getElementById("plainExplainContent");
-const outputSelect = document.getElementById("outputSelect");
 
 function escapeHtml(value) {
   return value
@@ -227,44 +226,3 @@ plainExplainButton.addEventListener("click", async function () {
   }
 });
 
-async function loadOutputList() {
-  try {
-    var response = await fetch("/api/outputs");
-    var data = await response.json();
-    outputSelect.innerHTML = '<option value="">📂 加载已有结果...</option>';
-    for (var f = 0; f < data.files.length; f++) {
-      var file = data.files[f];
-      var option = document.createElement("option");
-      option.value = file.name;
-      option.textContent = file.name;
-      outputSelect.appendChild(option);
-    }
-  } catch (error) {
-    console.error("加载 outputs 列表失败:", error);
-  }
-}
-
-outputSelect.addEventListener("change", async function () {
-  var fileName = outputSelect.value;
-  if (!fileName) return;
-
-  outputSelect.disabled = true;
-  readmeContent.textContent = "正在加载...";
-
-  try {
-    var response = await fetch("/api/output-content?file=" + encodeURIComponent(fileName));
-    var data = await response.json();
-    if (data.error) {
-      readmeContent.textContent = data.error;
-      return;
-    }
-    readmeContent.classList.remove("empty-state");
-    readmeContent.innerHTML = renderMarkdown(data.content);
-  } catch (error) {
-    readmeContent.textContent = error.message;
-  } finally {
-    outputSelect.disabled = false;
-  }
-});
-
-loadOutputList();

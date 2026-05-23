@@ -41,8 +41,7 @@ body {
 }
 
 input,
-button,
-.output-select {
+button {
   height: 40px;
   font: inherit;
 }
@@ -66,15 +65,6 @@ button {
 button:disabled {
   cursor: wait;
   background: #8bb8e0;
-}
-
-.output-select {
-  padding: 0 12px;
-  border: 1px solid #c7cfdb;
-  border-radius: 6px;
-  background: #ffffff;
-  min-width: 200px;
-  cursor: pointer;
 }
 
 .workspace {
