@@ -1,7 +1,5 @@
 ![Banner](assets/banner.png)
 
-# GitHub Walkthrough Assistant
-
 ## 1、项目目标
 
 帮助用户快速理解 GitHub 上的开源项目。输入仓库 URL，即可获得 README 的中文翻译、专业术语注释、结构化项目概览，以及对任意段落的大白话辅助说明——全部在同一个网页界面中完成。

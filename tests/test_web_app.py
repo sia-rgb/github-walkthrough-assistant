@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 from src.github_readme import ReadmeResult
-from src.web_app import build_analyze_response, build_plain_explain_response
+from src.app import build_analyze_response, build_plain_explain_response
 
 
 class FakeReadmeClient:
