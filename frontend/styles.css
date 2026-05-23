@@ -25,14 +25,22 @@ body {
   font-weight: 700;
 }
 
+.topbar-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .repo-form {
   display: grid;
   grid-template-columns: 1fr 96px;
   gap: 12px;
+  flex: 1;
 }
 
 input,
-button {
+button,
+.output-select {
   height: 40px;
   font: inherit;
 }
@@ -56,6 +64,15 @@ button {
 button:disabled {
   cursor: wait;
   background: #7f93bd;
+}
+
+.output-select {
+  padding: 0 12px;
+  border: 1px solid #c7cfdb;
+  border-radius: 6px;
+  background: #ffffff;
+  min-width: 200px;
+  cursor: pointer;
 }
 
 .workspace {
@@ -113,6 +130,11 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.markdown h1 {
+  margin: 24px 0 12px;
+  font-size: 20px;
+}
+
 .markdown h2 {
   margin: 22px 0 10px;
   font-size: 17px;
@@ -129,9 +151,49 @@ button:disabled {
   margin: 0 0 12px;
 }
 
-.markdown code,
+.markdown a {
+  color: #175ddc;
+  text-decoration: none;
+}
+
+.markdown a:hover {
+  text-decoration: underline;
+}
+
 .markdown pre {
+  margin: 0 0 14px;
+  padding: 14px;
+  background: #f0f2f5;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.markdown pre code {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.markdown code {
   font-family: Consolas, monospace;
+}
+
+.markdown table {
+  width: 100%;
+  margin: 0 0 16px;
+  border-collapse: collapse;
+}
+
+.markdown th,
+.markdown td {
+  padding: 8px 12px;
+  border: 1px solid #d8dee8;
+  text-align: left;
+}
+
+.markdown th {
+  background: #f0f2f5;
+  font-weight: 600;
 }
 
 .empty-state {
@@ -142,6 +204,11 @@ button:disabled {
   .topbar,
   .workspace {
     grid-template-columns: 1fr;
+  }
+
+  .topbar-controls {
+    flex-direction: column;
+    gap: 10px;
   }
 
   .workspace {

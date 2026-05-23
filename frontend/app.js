@@ -4,6 +4,7 @@ const overviewContent = document.getElementById("overviewContent");
 const readmeContent = document.getElementById("readmeContent");
 const plainExplainButton = document.getElementById("plainExplainButton");
 const plainExplainResult = document.getElementById("plainExplainResult");
+const outputSelect = document.getElementById("outputSelect");
 
 function escapeHtml(value) {
   return value
@@ -12,80 +13,185 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;");
 }
 
-function renderMarkdown(markdown) {
-  const lines = markdown.split(/\r?\n/);
-  const html = [];
-  let inList = false;
+function processInline(text) {
+  var escaped = escapeHtml(text);
+  return escaped.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener">$1</a>'
+  );
+}
 
-  for (const rawLine of lines) {
-    const line = rawLine.trimEnd();
-    if (!line.trim()) {
-      if (inList) {
-        html.push("</ul>");
-        inList = false;
-      }
-      continue;
-    }
-    if (line.startsWith("## ")) {
-      if (inList) {
-        html.push("</ul>");
-        inList = false;
-      }
-      html.push(`<h2>${escapeHtml(line.slice(3))}</h2>`);
-      continue;
-    }
-    if (line.startsWith("### ")) {
-      if (inList) {
-        html.push("</ul>");
-        inList = false;
-      }
-      html.push(`<h3>${escapeHtml(line.slice(4))}</h3>`);
-      continue;
-    }
-    if (line.startsWith("- ")) {
-      if (!inList) {
-        html.push("<ul>");
-        inList = true;
-      }
-      html.push(`<li>${escapeHtml(line.slice(2))}</li>`);
-      continue;
-    }
+function isTableSeparator(line) {
+  var trimmed = line.trim();
+  return /^\|[-:\s|]+\|$/.test(trimmed) && trimmed.indexOf("-") !== -1;
+}
+
+function looksLikeTableRow(line) {
+  var trimmed = line.trim();
+  return trimmed.startsWith("|") && trimmed.endsWith("|");
+}
+
+function splitTableCells(line) {
+  var trimmed = line.trim();
+  var inner = trimmed.slice(1, -1);
+  return inner.split("|").map(function (c) { return c.trim(); });
+}
+
+function renderMarkdown(markdown) {
+  var lines = markdown.split(/\r?\n/);
+  var html = [];
+  var inList = false;
+  var inCodeBlock = false;
+  var codeLines = [];
+  var tableBuffer = [];
+
+  function closeList() {
     if (inList) {
       html.push("</ul>");
       inList = false;
     }
-    html.push(`<p>${escapeHtml(line)}</p>`);
   }
 
-  if (inList) {
-    html.push("</ul>");
+  function flushTable() {
+    if (tableBuffer.length === 0) return;
+
+    if (tableBuffer.length >= 2 && isTableSeparator(tableBuffer[1])) {
+      html.push("<table>");
+      var headerCells = splitTableCells(tableBuffer[0]);
+      html.push("<thead><tr>");
+      for (var h = 0; h < headerCells.length; h++) {
+        html.push("<th>" + processInline(headerCells[h]) + "</th>");
+      }
+      html.push("</tr></thead>");
+
+      if (tableBuffer.length > 2) {
+        html.push("<tbody>");
+        for (var r = 2; r < tableBuffer.length; r++) {
+          var cells = splitTableCells(tableBuffer[r]);
+          html.push("<tr>");
+          for (var c = 0; c < cells.length; c++) {
+            html.push("<td>" + processInline(cells[c]) + "</td>");
+          }
+          html.push("</tr>");
+        }
+        html.push("</tbody>");
+      }
+      html.push("</table>");
+    } else {
+      for (var t = 0; t < tableBuffer.length; t++) {
+        html.push("<p>" + processInline(tableBuffer[t]) + "</p>");
+      }
+    }
+    tableBuffer = [];
   }
+
+  for (var i = 0; i < lines.length; i++) {
+    var rawLine = lines[i];
+    var line = rawLine.trimEnd();
+    var trimmed = line.trim();
+
+    if (inCodeBlock) {
+      if (trimmed.startsWith("```")) {
+        html.push("<pre><code>");
+        html.push(escapeHtml(codeLines.join("\n")));
+        html.push("</code></pre>");
+        inCodeBlock = false;
+        codeLines = [];
+        continue;
+      }
+      codeLines.push(rawLine);
+      continue;
+    }
+
+    if (trimmed.startsWith("```")) {
+      closeList();
+      flushTable();
+      inCodeBlock = true;
+      codeLines = [];
+      continue;
+    }
+
+    if (looksLikeTableRow(trimmed) && !isTableSeparator(trimmed)) {
+      closeList();
+      tableBuffer.push(trimmed);
+      continue;
+    }
+
+    if (isTableSeparator(trimmed)) {
+      tableBuffer.push(trimmed);
+      continue;
+    }
+
+    flushTable();
+
+    if (!trimmed) {
+      closeList();
+      continue;
+    }
+
+    if (trimmed.startsWith("# ")) {
+      closeList();
+      html.push("<h1>" + processInline(trimmed.slice(2)) + "</h1>");
+      continue;
+    }
+    if (trimmed.startsWith("## ")) {
+      closeList();
+      html.push("<h2>" + processInline(trimmed.slice(3)) + "</h2>");
+      continue;
+    }
+    if (trimmed.startsWith("### ")) {
+      closeList();
+      html.push("<h3>" + processInline(trimmed.slice(4)) + "</h3>");
+      continue;
+    }
+
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      if (!inList) {
+        html.push("<ul>");
+        inList = true;
+      }
+      html.push("<li>" + processInline(trimmed.slice(2)) + "</li>");
+      continue;
+    }
+
+    closeList();
+    html.push("<p>" + processInline(line) + "</p>");
+  }
+
+  if (inCodeBlock) {
+    html.push("<pre><code>");
+    html.push(escapeHtml(codeLines.join("\n")));
+    html.push("</code></pre>");
+  }
+  flushTable();
+  closeList();
+
   return html.join("");
 }
 
 async function postJson(url, payload) {
-  const response = await fetch(url, {
+  var response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const data = await response.json();
+  var data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "请求失败");
   }
   return data;
 }
 
-analyzeForm.addEventListener("submit", async (event) => {
+analyzeForm.addEventListener("submit", async function (event) {
   event.preventDefault();
-  const button = analyzeForm.querySelector("button");
+  var button = analyzeForm.querySelector("button");
   button.disabled = true;
   overviewContent.textContent = "正在生成项目概览...";
   readmeContent.textContent = "正在翻译 README...";
   plainExplainResult.hidden = true;
 
   try {
-    const data = await postJson("/api/analyze", { repo_url: repoUrlInput.value });
+    var data = await postJson("/api/analyze", { repo_url: repoUrlInput.value });
     overviewContent.classList.remove("empty-state");
     readmeContent.classList.remove("empty-state");
     overviewContent.innerHTML = renderMarkdown(data.project_overview);
@@ -98,8 +204,8 @@ analyzeForm.addEventListener("submit", async (event) => {
   }
 });
 
-plainExplainButton.addEventListener("click", async () => {
-  const selectedText = window.getSelection().toString().trim();
+plainExplainButton.addEventListener("click", async function () {
+  var selectedText = window.getSelection().toString().trim();
   if (!selectedText) {
     plainExplainResult.hidden = false;
     plainExplainResult.textContent = "请先在右侧 README 区域选中一段中文文本。";
@@ -111,7 +217,7 @@ plainExplainButton.addEventListener("click", async () => {
   plainExplainResult.textContent = "正在生成大白话说明...";
 
   try {
-    const data = await postJson("/api/plain-explain", { selected_text: selectedText });
+    var data = await postJson("/api/plain-explain", { selected_text: selectedText });
     plainExplainResult.innerHTML = renderMarkdown(data.plain_explanation);
   } catch (error) {
     plainExplainResult.textContent = error.message;
@@ -119,3 +225,45 @@ plainExplainButton.addEventListener("click", async () => {
     plainExplainButton.disabled = false;
   }
 });
+
+async function loadOutputList() {
+  try {
+    var response = await fetch("/api/outputs");
+    var data = await response.json();
+    outputSelect.innerHTML = '<option value="">📂 加载已有结果...</option>';
+    for (var f = 0; f < data.files.length; f++) {
+      var file = data.files[f];
+      var option = document.createElement("option");
+      option.value = file.name;
+      option.textContent = file.name;
+      outputSelect.appendChild(option);
+    }
+  } catch (error) {
+    console.error("加载 outputs 列表失败:", error);
+  }
+}
+
+outputSelect.addEventListener("change", async function () {
+  var fileName = outputSelect.value;
+  if (!fileName) return;
+
+  outputSelect.disabled = true;
+  readmeContent.textContent = "正在加载...";
+
+  try {
+    var response = await fetch("/api/output-content?file=" + encodeURIComponent(fileName));
+    var data = await response.json();
+    if (data.error) {
+      readmeContent.textContent = data.error;
+      return;
+    }
+    readmeContent.classList.remove("empty-state");
+    readmeContent.innerHTML = renderMarkdown(data.content);
+  } catch (error) {
+    readmeContent.textContent = error.message;
+  } finally {
+    outputSelect.disabled = false;
+  }
+});
+
+loadOutputList();
