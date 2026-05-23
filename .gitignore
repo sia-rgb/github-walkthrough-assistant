@@ -1,7 +1,6 @@
 # 本地配置和生成文件
-data/
 tests/*
-docs/
+outputs/
 logs/
 !tests/test_run_pipeline.py
 

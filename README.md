@@ -1,4 +1,4 @@
-# GitHub 项目 Walkthrough 助手
+# GitHub Walkthrough Assistant
 
 1. 项目目标
 帮助用户快速理解 GitHub 上的开源项目项目，包括 README、核心脚本，通过中文翻译、术语注释和按需大白话辅助说明，生成结构化项目概览。
@@ -12,7 +12,6 @@
 
 3. 输入
 - GitHub 仓库 URL
-- 可选：项目文件或日志段落粘贴
 
 4. 输出
 - README.md 中文专业翻译
