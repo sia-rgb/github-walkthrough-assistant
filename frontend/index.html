@@ -21,18 +21,11 @@
   </header>
 
   <main class="workspace">
-    <aside id="overviewPane" class="overview-pane" aria-label="项目概览">
-      <h2>项目概览</h2>
-      <div id="overviewContent" class="markdown empty-state">等待分析结果</div>
-    </aside>
-
-    <div class="content-column">
-      <section id="readmePane" class="readme-pane" aria-label="README 中文翻译和术语注释">
-        <div class="readme-toolbar">
-          <h2>README 中文翻译与术语注释</h2>
-        </div>
-        <article id="readmeContent" class="markdown empty-state">输入 GitHub 仓库 URL 后开始分析</article>
-      </section>
+    <div class="left-column">
+      <aside id="overviewPane" class="overview-pane" aria-label="项目概览">
+        <h2>项目概览</h2>
+        <div id="overviewContent" class="markdown empty-state">等待分析结果</div>
+      </aside>
 
       <section id="plainExplainPane" class="plain-explain-pane" aria-label="大白话说明">
         <div class="plain-explain-toolbar">
@@ -40,6 +33,15 @@
           <button id="plainExplainButton" type="button">生成说明</button>
         </div>
         <div id="plainExplainContent" class="markdown empty-state">选中 README 中的文本后点击上方"生成说明"按钮</div>
+      </section>
+    </div>
+
+    <div class="content-column">
+      <section id="readmePane" class="readme-pane" aria-label="README 中文翻译和术语注释">
+        <div class="readme-toolbar">
+          <h2>README 中文翻译与术语注释</h2>
+        </div>
+        <article id="readmeContent" class="markdown empty-state">输入 GitHub 仓库 URL 后开始分析</article>
       </section>
     </div>
   </main>

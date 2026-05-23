@@ -67,10 +67,11 @@ class WebAppTests(unittest.TestCase):
         self.assertIn('id="readmePane"', html)
         self.assertLess(html.index('id="overviewPane"'), html.index('id="readmePane"'))
         self.assertIn('id="plainExplainButton"', html)
-        self.assertGreater(html.index('id="plainExplainButton"'), html.index('id="readmeContent"'))
+        self.assertLess(html.index('id="plainExplainButton"'), html.index('id="readmeContent"'))
         self.assertIn('id="plainExplainPane"', html)
         self.assertIn('class="content-column"', html)
-        self.assertLess(html.index('id="readmePane"'), html.index('id="plainExplainPane"'))
+        self.assertIn('class="left-column"', html)
+        self.assertLess(html.index('id="plainExplainPane"'), html.index('id="readmePane"'))
 
 
 if __name__ == "__main__":
