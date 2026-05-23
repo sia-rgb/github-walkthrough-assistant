@@ -24,16 +24,53 @@
 ### 3.1 公网入口
 待补充
 
-### 3.2 本地启动
-
-双击 `start.bat`，浏览器自动打开本地服务器
-
-### 3.3 终端执行：
+### 3.2 安装依赖
 
 ```bash
-python -m src.web_app
+python -m pip install -r requirements.txt
 ```
 
+### 3.3 配置环境变量
+
+在项目根目录创建 `.env`：
+
+```text
+DEEPSEEK_API_KEY=你的 DeepSeek API Key
+DEEPSEEK_MODEL=deepseek-chat
+GITHUB_TOKEN=可选，用于提高 GitHub API 额度
+```
+
+### 3.4 启动网页界面
+
+```bash
+python -m uvicorn src.app:APP --host 127.0.0.1 --port 8010
+```
+
+浏览器打开：
+
+```text
+http://127.0.0.1:8010
+```
+
+### 3.5 命令行脚本
+
+README 中文翻译：
+
+```bash
+python -m src.run_mvp1 https://github.com/owner/repo
+```
+
+项目概览生成：
+
+```bash
+python -m src.run_mvp2 https://github.com/owner/repo
+```
+
+大白话辅助说明：
+
+```bash
+python -m src.run_mvp3 --text "需要解释的文本"
+```
 
 ## 4、相关定义
 

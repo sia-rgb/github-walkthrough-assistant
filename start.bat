@@ -14,5 +14,5 @@ if errorlevel 1 (
 echo Server starting at http://127.0.0.1:8010
 start http://127.0.0.1:8010
 
-python -m src.web_app
+python -m uvicorn src.app:APP --host 127.0.0.1 --port 8010
 pause
