@@ -52,6 +52,21 @@ def build_project_overview_prompt(repository_context):
     )
 
 
+def build_plain_explanation_prompt(selected_text):
+    return (
+        "请为下面这段中文选中文本生成中文大白话辅助说明。\n\n"
+        "要求：\n"
+        "- 只作为“大白话辅助说明”，不替代原文。\n"
+        "- 不改变原文里的专业判断、数字、命令、代码含义。\n"
+        "- 优先解释复杂概念、术语、隐含背景和这段话想表达的重点。\n"
+        "- 语言要清楚、直接，适合技术背景较弱的读者理解。\n\n"
+        "输出必须使用以下 Markdown 结构：\n\n"
+        "## 大白话辅助说明\n\n"
+        "中文选中文本如下：\n\n"
+        f"{selected_text}"
+    )
+
+
 def load_dotenv_values(path=".env"):
     values = {}
     if not os.path.exists(path):
@@ -137,6 +152,32 @@ class DeepSeekClient:
                     "content": "你是开源项目分析助手。输出中文，区分核心技术/功能与硬件/软件要求。",
                 },
                 {"role": "user", "content": build_project_overview_prompt(repository_context)},
+            ],
+            "temperature": 0.2,
+        }
+        request = Request(
+            self.endpoint,
+            data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            },
+        )
+        with self.transport(request, timeout=self.timeout) as response:
+            response_payload = response.read().decode("utf-8")
+
+        data = json.loads(response_payload)
+        return data["choices"][0]["message"]["content"]
+
+    def generate_plain_explanation(self, selected_text):
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "你是技术内容解释助手。输出中文，解释要通俗但不能篡改专业含义。",
+                },
+                {"role": "user", "content": build_plain_explanation_prompt(selected_text)},
             ],
             "temperature": 0.2,
         }
