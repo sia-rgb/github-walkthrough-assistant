@@ -26,14 +26,22 @@
       <div id="overviewContent" class="markdown empty-state">等待分析结果</div>
     </aside>
 
-    <section id="readmePane" class="readme-pane" aria-label="README 中文翻译和术语注释">
-      <div class="readme-toolbar">
-        <h2>README 中文翻译与术语注释</h2>
-        <button id="plainExplainButton" type="button">大白话说明</button>
-      </div>
-      <div id="plainExplainResult" class="plain-result" hidden></div>
-      <article id="readmeContent" class="markdown empty-state">输入 GitHub 仓库 URL 后开始分析</article>
-    </section>
+    <div class="content-column">
+      <section id="readmePane" class="readme-pane" aria-label="README 中文翻译和术语注释">
+        <div class="readme-toolbar">
+          <h2>README 中文翻译与术语注释</h2>
+        </div>
+        <article id="readmeContent" class="markdown empty-state">输入 GitHub 仓库 URL 后开始分析</article>
+      </section>
+
+      <section id="plainExplainPane" class="plain-explain-pane" aria-label="大白话说明">
+        <div class="plain-explain-toolbar">
+          <h2>大白话说明</h2>
+          <button id="plainExplainButton" type="button">生成说明</button>
+        </div>
+        <div id="plainExplainContent" class="markdown empty-state">选中 README 中的文本后点击上方"生成说明"按钮</div>
+      </section>
+    </div>
   </main>
 
   <script src="/app.js"></script>

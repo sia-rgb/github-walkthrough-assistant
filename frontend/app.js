@@ -3,7 +3,7 @@ const repoUrlInput = document.getElementById("repoUrlInput");
 const overviewContent = document.getElementById("overviewContent");
 const readmeContent = document.getElementById("readmeContent");
 const plainExplainButton = document.getElementById("plainExplainButton");
-const plainExplainResult = document.getElementById("plainExplainResult");
+const plainExplainContent = document.getElementById("plainExplainContent");
 const outputSelect = document.getElementById("outputSelect");
 
 function escapeHtml(value) {
@@ -188,7 +188,8 @@ analyzeForm.addEventListener("submit", async function (event) {
   button.disabled = true;
   overviewContent.textContent = "正在生成项目概览...";
   readmeContent.textContent = "正在翻译 README...";
-  plainExplainResult.hidden = true;
+  plainExplainContent.classList.add("empty-state");
+  plainExplainContent.textContent = "选中 README 中的文本后点击\"大白话说明\"按钮";
 
   try {
     var data = await postJson("/api/analyze", { repo_url: repoUrlInput.value });
@@ -207,20 +208,20 @@ analyzeForm.addEventListener("submit", async function (event) {
 plainExplainButton.addEventListener("click", async function () {
   var selectedText = window.getSelection().toString().trim();
   if (!selectedText) {
-    plainExplainResult.hidden = false;
-    plainExplainResult.textContent = "请先在右侧 README 区域选中一段中文文本。";
+    plainExplainContent.classList.add("empty-state");
+    plainExplainContent.textContent = "请先在右侧 README 区域选中一段中文文本。";
     return;
   }
 
   plainExplainButton.disabled = true;
-  plainExplainResult.hidden = false;
-  plainExplainResult.textContent = "正在生成大白话说明...";
+  plainExplainContent.classList.remove("empty-state");
+  plainExplainContent.textContent = "正在生成大白话说明...";
 
   try {
     var data = await postJson("/api/plain-explain", { selected_text: selectedText });
-    plainExplainResult.innerHTML = renderMarkdown(data.plain_explanation);
+    plainExplainContent.innerHTML = renderMarkdown(data.plain_explanation);
   } catch (error) {
-    plainExplainResult.textContent = error.message;
+    plainExplainContent.textContent = error.message;
   } finally {
     plainExplainButton.disabled = false;
   }
