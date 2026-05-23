@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 项目 Walkthrough 助手</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>GitHub 项目 Walkthrough 助手</h1>
+    <form id="analyzeForm" class="repo-form">
+      <input id="repoUrlInput" type="url" required placeholder="https://github.com/karpathy/nanochat">
+      <button type="submit">分析</button>
+    </form>
+  </header>
+
+  <main class="workspace">
+    <aside id="overviewPane" class="overview-pane" aria-label="项目概览">
+      <h2>项目概览</h2>
+      <div id="overviewContent" class="markdown empty-state">等待分析结果</div>
+    </aside>
+
+    <section id="readmePane" class="readme-pane" aria-label="README 中文翻译和术语注释">
+      <div class="readme-toolbar">
+        <h2>README 中文翻译与术语注释</h2>
+        <button id="plainExplainButton" type="button">大白话说明</button>
+      </div>
+      <div id="plainExplainResult" class="plain-result" hidden></div>
+      <article id="readmeContent" class="markdown empty-state">输入 GitHub 仓库 URL 后开始分析</article>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

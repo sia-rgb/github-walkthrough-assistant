@@ -1,5 +1,6 @@
 import base64
 import json
+import os
 from dataclasses import dataclass
 from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
@@ -37,9 +38,15 @@ def parse_github_url(url):
 
 
 class GitHubClient:
-    def __init__(self, transport=urlopen, timeout=30):
+    def __init__(self, transport=urlopen, timeout=30, token=None):
         self.transport = transport
         self.timeout = timeout
+        self.token = token
+
+    @classmethod
+    def from_env(cls, env_path=".env"):
+        token = os.environ.get("GITHUB_TOKEN") or _load_env_value(env_path, "GITHUB_TOKEN")
+        return cls(token=token)
 
     def fetch_readme(self, repo_url):
         repo = parse_github_url(repo_url)
@@ -67,12 +74,16 @@ class GitHubClient:
         return default_branch
 
     def _get_json(self, url):
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "github-walkthrough-assistant",
+        }
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+
         request = Request(
             url,
-            headers={
-                "Accept": "application/vnd.github+json",
-                "User-Agent": "github-walkthrough-assistant",
-            },
+            headers=headers,
         )
         with self.transport(request, timeout=self.timeout) as response:
             payload = response.read().decode("utf-8")
@@ -84,3 +95,18 @@ class GitHubClient:
         raw_content = readme.get("content", "")
         decoded = base64.b64decode(raw_content.encode("ascii"))
         return decoded.decode("utf-8")
+
+
+def _load_env_value(path, target_key):
+    if not os.path.exists(path):
+        return None
+
+    with open(path, "r", encoding="utf-8") as env_file:
+        for line in env_file:
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#") or "=" not in stripped:
+                continue
+            key, value = stripped.split("=", 1)
+            if key.strip() == target_key:
+                return value.strip().strip('"').strip("'")
+    return None

@@ -1,0 +1,150 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #202124;
+  background: #f5f7fb;
+  font-family: Arial, "Microsoft YaHei", sans-serif;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 360px) 1fr;
+  gap: 24px;
+  align-items: center;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #d8dee8;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.repo-form {
+  display: grid;
+  grid-template-columns: 1fr 96px;
+  gap: 12px;
+}
+
+input,
+button {
+  height: 40px;
+  font: inherit;
+}
+
+input {
+  width: 100%;
+  padding: 0 12px;
+  border: 1px solid #c7cfdb;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+button {
+  border: 0;
+  border-radius: 6px;
+  color: #ffffff;
+  background: #175ddc;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  background: #7f93bd;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 34%) 1fr;
+  gap: 18px;
+  height: calc(100vh - 73px);
+  padding: 18px;
+}
+
+.overview-pane,
+.readme-pane {
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+}
+
+.overview-pane h2,
+.readme-toolbar h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.readme-pane {
+  position: relative;
+}
+
+.readme-toolbar {
+  position: sticky;
+  top: -18px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 132px;
+  gap: 12px;
+  align-items: center;
+  margin: -18px -18px 16px;
+  padding: 14px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #d8dee8;
+}
+
+.plain-result {
+  margin-bottom: 16px;
+  padding: 14px;
+  background: #eef6ff;
+  border: 1px solid #bfd7ff;
+  border-radius: 8px;
+}
+
+.markdown {
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.markdown h2 {
+  margin: 22px 0 10px;
+  font-size: 17px;
+}
+
+.markdown h3 {
+  margin: 18px 0 8px;
+  font-size: 15px;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol {
+  margin: 0 0 12px;
+}
+
+.markdown code,
+.markdown pre {
+  font-family: Consolas, monospace;
+}
+
+.empty-state {
+  color: #667085;
+}
+
+@media (max-width: 900px) {
+  .topbar,
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace {
+    height: auto;
+  }
+}

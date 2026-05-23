@@ -33,6 +33,15 @@ class FakeTransport:
         raise AssertionError(f"Unexpected URL: {request.full_url}")
 
 
+class RecordingTransport:
+    def __init__(self):
+        self.requests = []
+
+    def __call__(self, request, timeout):
+        self.requests.append(request)
+        return FakeResponse(json.dumps({"default_branch": "main"}))
+
+
 class GitHubReadmeTests(unittest.TestCase):
     def test_parse_github_url_extracts_owner_and_repo(self):
         repo = parse_github_url("https://github.com/karpathy/nanochat")
@@ -52,6 +61,14 @@ class GitHubReadmeTests(unittest.TestCase):
         self.assertEqual(result.path, "README.md")
         self.assertEqual(result.content, "# NanoChat\n")
         self.assertIn("https://api.github.com/repos/karpathy/nanochat/readme?ref=master", transport.urls)
+
+    def test_token_is_sent_as_authorization_header(self):
+        transport = RecordingTransport()
+        client = GitHubClient(transport=transport, token="secret-token")
+
+        client._get_json("https://api.github.com/repos/example/project")
+
+        self.assertEqual(transport.requests[0].headers["Authorization"], "Bearer secret-token")
 
 
 if __name__ == "__main__":
