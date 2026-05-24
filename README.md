@@ -22,7 +22,8 @@
 ## 3、快速启动
 
 ### 3.1 公网入口
-待补充
+http://8.133.178.210/github-walkthrough-assistant/
+
 
 ### 3.2 安装依赖
 
