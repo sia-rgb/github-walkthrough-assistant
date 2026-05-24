@@ -72,4 +72,5 @@ def api_plain_explain(body: PlainExplainRequest):
         return {"error": str(exc)}
 
 
+APP.mount("/static", StaticFiles(directory=str(FRONTEND_ROOT)), name="frontend-static")
 APP.mount("/", StaticFiles(directory=str(FRONTEND_ROOT), html=True), name="static")

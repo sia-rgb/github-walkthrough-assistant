@@ -3,6 +3,7 @@ tests/*
 outputs/
 logs/
 !tests/test_run_pipeline.py
+!tests/test_static_assets.py
 
 # Python相关
 __pycache__/
