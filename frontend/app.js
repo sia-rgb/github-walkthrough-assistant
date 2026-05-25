@@ -191,7 +191,7 @@ analyzeForm.addEventListener("submit", async function (event) {
   plainExplainContent.textContent = "选中 README 中的文本后点击\"大白话说明\"按钮";
 
   try {
-    var data = await postJson("/api/analyze", { repo_url: repoUrlInput.value });
+    var data = await postJson("api/analyze", { repo_url: repoUrlInput.value });
     overviewContent.classList.remove("empty-state");
     readmeContent.classList.remove("empty-state");
     overviewContent.innerHTML = renderMarkdown(data.project_overview);
@@ -217,7 +217,7 @@ plainExplainButton.addEventListener("click", async function () {
   plainExplainContent.textContent = "正在生成大白话说明...";
 
   try {
-    var data = await postJson("/api/plain-explain", { selected_text: selectedText });
+    var data = await postJson("api/plain-explain", { selected_text: selectedText });
     plainExplainContent.innerHTML = renderMarkdown(data.plain_explanation);
   } catch (error) {
     plainExplainContent.textContent = error.message;

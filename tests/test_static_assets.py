@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from src.app import APP
@@ -23,3 +25,13 @@ def test_homepage_references_static_assets():
     assert response.status_code == 200
     assert 'href="static/styles.css"' in response.text
     assert 'src="static/app.js"' in response.text
+
+
+def test_frontend_api_requests_use_relative_paths():
+    app_js = (
+        Path(__file__).resolve().parent.parent / "frontend" / "app.js"
+    ).read_text(encoding="utf-8")
+
+    assert 'postJson("api/analyze"' in app_js
+    assert 'postJson("api/plain-explain"' in app_js
+    assert 'postJson("/api/' not in app_js
