@@ -21,16 +21,7 @@
 
 ## 3、快速启动
 
-### 3.1 公网入口
-http://8.133.178.210/github-walkthrough-assistant/
-
-### 3.2 安装依赖
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-### 3.3 配置环境变量
+#### 配置环境变量
 
 在项目根目录创建 `.env`：
 
@@ -40,36 +31,27 @@ DEEPSEEK_MODEL=deepseek-chat
 GITHUB_TOKEN=可选，用于提高 GitHub API 额度
 ```
 
-### 3.4 启动网页界面
+### 3.1 本地一键启动
 
-```bash
-python -m uvicorn src.app:APP --host 127.0.0.1 --port 8010
+适用于 Windows。本地配置 `.env` 后，在项目根目录双击 `start.bat`，或在命令行执行：
+
+```bat
+start.bat
 ```
 
-浏览器打开：
+启动后浏览器会自动打开：
 
 ```text
 http://127.0.0.1:8010
 ```
 
-### 3.5 命令行脚本
-
-README 中文翻译：
-
-```bash
-python -m src.run_mvp1 https://github.com/owner/repo
+首次运行前先安装依赖
 ```
 
-项目概览生成：
+### 3.2 命令行启动
 
 ```bash
-python -m src.run_mvp2 https://github.com/owner/repo
-```
-
-大白话辅助说明：
-
-```bash
-python -m src.run_mvp3 --text "需要解释的文本"
+python -m uvicorn src.app:APP --host 127.0.0.1 --port 8010
 ```
 
 ## 4、相关定义
