@@ -24,7 +24,6 @@
 ### 3.1 公网入口
 http://8.133.178.210/github-walkthrough-assistant/
 
-
 ### 3.2 安装依赖
 
 ```bash
