@@ -169,21 +169,101 @@ function renderMarkdown(markdown) {
 }
 
 async function postJson(url, payload) {
+  console.info("[postJson] request", {
+    url: url,
+    payload: buildDebugPayload(url, payload),
+  });
+
   var response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  var data = await response.json();
+  var data = await readResponseBody(response);
+
+  console.info("[postJson] response", {
+    url: url,
+    status: response.status,
+    body: data,
+  });
+
   if (!response.ok) {
-    throw new Error(data.error || "请求失败");
+    var message = buildHttpErrorMessage(response, data);
+    console.error("[postJson] error", {
+      url: url,
+      status: response.status,
+      body: data,
+      message: message,
+    });
+    throw new Error(message);
   }
   return data;
+}
+
+function buildDebugPayload(url, payload) {
+  if (url === "api/plain-explain" && payload.selected_text) {
+    return { selected_text_length: payload.selected_text.length };
+  }
+  return payload;
+}
+
+async function readResponseBody(response) {
+  var text = await response.text();
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return { raw: text };
+  }
+}
+
+function stringifyDebugValue(value) {
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch (error) {
+    return String(value);
+  }
+}
+
+function buildHttpErrorMessage(response, data) {
+  var message = "HTTP " + response.status + " " + response.statusText;
+  message += "\nresponse body: " + stringifyDebugValue(data);
+
+  if (data && data.detail) {
+    message += "\ndetail: " + stringifyDebugValue(data.detail);
+  }
+
+  if (data && data.error) {
+    message += "\nerror: " + data.error;
+  }
+
+  return message;
 }
 
 analyzeForm.addEventListener("submit", async function (event) {
   event.preventDefault();
   var button = analyzeForm.querySelector("button");
+  var requestPath = "api/analyze";
+  var rawRepoUrl = repoUrlInput.value;
+  var repoUrl = rawRepoUrl.trim();
+  var analyzePayload = { repo_url: repoUrl };
+
+  console.info("[analyze] input", {
+    requestPath: requestPath,
+    repoUrlInputValue: rawRepoUrl,
+    trimmedRepoUrl: repoUrl,
+    payload: analyzePayload,
+  });
+
+  if (!repoUrl) {
+    overviewContent.textContent = "请输入 GitHub 仓库 URL";
+    readmeContent.textContent = "分析失败";
+    return;
+  }
+
   button.disabled = true;
   overviewContent.textContent = "正在生成项目概览...";
   readmeContent.textContent = "正在翻译 README...";
@@ -191,7 +271,7 @@ analyzeForm.addEventListener("submit", async function (event) {
   plainExplainContent.textContent = "选中 README 中的文本后点击\"大白话说明\"按钮";
 
   try {
-    var data = await postJson("api/analyze", { repo_url: repoUrlInput.value });
+    var data = await postJson(requestPath, analyzePayload);
     overviewContent.classList.remove("empty-state");
     readmeContent.classList.remove("empty-state");
     overviewContent.innerHTML = renderMarkdown(data.project_overview);

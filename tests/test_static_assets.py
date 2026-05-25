@@ -5,6 +5,12 @@ from fastapi.testclient import TestClient
 from src.app import APP
 
 
+def read_frontend_app_js():
+    return (
+        Path(__file__).resolve().parent.parent / "frontend" / "app.js"
+    ).read_text(encoding="utf-8")
+
+
 def test_static_assets_are_served_under_static_prefix():
     client = TestClient(APP)
 
@@ -28,10 +34,29 @@ def test_homepage_references_static_assets():
 
 
 def test_frontend_api_requests_use_relative_paths():
-    app_js = (
-        Path(__file__).resolve().parent.parent / "frontend" / "app.js"
-    ).read_text(encoding="utf-8")
+    app_js = read_frontend_app_js()
 
-    assert 'postJson("api/analyze"' in app_js
+    assert '"api/analyze"' in app_js
     assert 'postJson("api/plain-explain"' in app_js
     assert 'postJson("/api/' not in app_js
+    assert '"/api/' not in app_js
+
+
+def test_analyze_payload_uses_trimmed_repo_url():
+    app_js = read_frontend_app_js()
+
+    assert "var rawRepoUrl = repoUrlInput.value;" in app_js
+    assert "var repoUrl = rawRepoUrl.trim();" in app_js
+    assert "var analyzePayload = { repo_url: repoUrl };" in app_js
+    assert "{ repo_url: repoUrlInput.value }" not in app_js
+
+
+def test_frontend_logs_request_and_full_error_details():
+    app_js = read_frontend_app_js()
+
+    assert "function buildHttpErrorMessage(response, data)" in app_js
+    assert "data.detail" in app_js
+    assert "response.status" in app_js
+    assert 'console.info("[postJson] request"' in app_js
+    assert 'console.info("[postJson] response"' in app_js
+    assert 'console.info("[analyze] input"' in app_js
